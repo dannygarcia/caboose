@@ -38,3 +38,46 @@
 	background-color: mix($top, $btm);
 	@include background-image(linear-gradient($top, $btm));
 }
+
+// Experimental Both
+// This mixin functions like Compass' @experimental
+// except it will prefix the property and the value.
+// Useful for mask-image: gradient(); and other types
+// of methods that require property and value prefixing.
+@mixin experimental-both($property, $value, $moz: $experimental-support-for-mozilla, $webkit: $experimental-support-for-webkit, $o: $experimental-support-for-opera, $ms: $experimental-support-for-microsoft, $khtml: $experimental-support-for-khtml, $official: true) {
+	@if $webkit and $experimental-support-for-webkit {
+		-webkit-#{$property}: -webkit-#{$value}; }
+	@if $khtml and $experimental-support-for-khtml {
+		-khtml-#{$property}: -khtml-#{$value}; }
+	@if $moz and $experimental-support-for-mozilla {
+		-moz-#{$property}: -moz-#{$value}; }
+	@if $ms and $experimental-support-for-microsoft {
+		-ms-#{$property}: -ms-#{$value}; }
+	@if $o and $experimental-support-for-opera {
+		-o-#{$property}: -o-#{$value}; }
+	@if $official {
+		#{$property}: #{$value}; } }
+
+@mixin mask-image($gradient) {
+	@include experimental-both(mask-image, $gradient); }
+
+// Simple linear gradient given that Compass' @linear-gradient has been deprecated.
+@function fading-gradient($from-edge, $to-edge, $from-color, $to-color) {
+	@return gradient(linear, $from-edge, $to-edge, from($from-color), to($to-color)); }
+
+// Creates a mask-image given the amount of fade-out %.
+@mixin fade-mask($amount, $side:horizontal) {
+	@if $side == horizontal {
+		@include mask-image(gradient(linear, left top, right top, color-stop(0%, rgba(0,0,0,0)), color-stop(#{$amount + "%"}, rgba(0,0,0,1)), color-stop(#{100 - $amount + "%"}, rgba(0,0,0,1)), color-stop(100%, rgba(0,0,0,0)))); }
+	@if $side == vertical {
+		@include mask-image(gradient(linear, left top, left bottom, color-stop(0%, rgba(0,0,0,0)), color-stop(#{$amount + "%"}, rgba(0,0,0,1)), color-stop(#{100 - $amount + "%"}, rgba(0,0,0,1)), color-stop(100%, rgba(0,0,0,0)))); }
+	@if $side == top {
+		@include mask-image(fading-gradient(left #{100 - $amount + "%"}, left top, rgba(0,0,0,1), rgba(0,0,0,0))); }
+	@if $side == right {
+		@include mask-image(fading-gradient(left #{100 - $amount + "%"}, right top, rgba(0,0,0,1), rgba(0,0,0,0))); }
+	@if $side == bottom {
+		@include mask-image(fading-gradient(left #{100 - $amount + "%"}, left bottom, rgba(0,0,0,1), rgba(0,0,0,0))); }
+	@if $side == left {
+		@include mask-image(fading-gradient(right #{100 - $amount + "%"}, left top, rgba(0,0,0,1), rgba(0,0,0,0)));
+	}
+}
